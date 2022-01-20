@@ -1,22 +1,25 @@
 const request = require('request');
 
 const options = { method: 'GET',
-  url: 'https://api.thecatapi.co/v1/breeds/search?q=' + process.argv[2],
+  url: 'https://api.thecatapi.com/v1/breeds/search?q=',
   headers: { 'x-api-key': 'DEMO-API-KEY' } };
 
 
+const fetchBreedDescription = function(breedName, callback) {
+  options['url'] += breedName;
+  request(options, (error, response, body) => {
+    if (error) {
+      console.log(`ERROR: request could not be completed.`);
+      return;
+    }
+    const data = JSON.parse(body);
+    if (data.length === 0) {
+      callback(null, `Breed not in database`);
+    }
+    if (data.length > 0) {
+      callback(null, data[0]['description']);
+    }
+  });
+};
 
-request(options, function(error, response, body) {
-  const errorMsg = `Error: request could not be completed.`;
-  if (error) throw new Error(errorMsg);
-
-  const data = JSON.parse(body);
-
-  if (data.length === 0) {
-    console.log(`Breed not in database`);
-  }
-  if (data.length > 0) {
-    console.log(data[0]['description']);
-  }
-
-});
+module.exports = fetchBreedDescription;
